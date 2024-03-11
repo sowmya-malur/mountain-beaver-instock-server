@@ -1,14 +1,16 @@
 const express = require("express");
 const app = express();
-require("dotenv").config(); 
+const stockRoute = require("./routes/stock");
+require("dotenv").config();
 
 const { PORT, CLIENT_URL } = process.env;
 
-app.get("/", (req, res) => {
-    res.send("<h1>Hello, World </h1>");
-  });
+app.use(express.json());
 
-  app.listen(PORT, () => {
-    console.log(`app running at ${CLIENT_URL}:${PORT}`);
-  });
-  
+app.use(cors({ origin: CLIENT_URL }));
+
+app.use("/", stockRoute);
+
+app.listen(PORT, () => {
+  console.log(`app running at "http://localhost:${PORT}"`);
+});
