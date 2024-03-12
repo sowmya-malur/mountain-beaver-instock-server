@@ -96,3 +96,5 @@ exports.seed = async function (knex) {
     },
   ]);
 };
+
+module.exports = router;
