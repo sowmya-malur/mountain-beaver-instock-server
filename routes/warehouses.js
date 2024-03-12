@@ -10,11 +10,7 @@ router
 router
     .route("/:id")
     .get(warehouseController.findOne)
-    .patch(warehouseController.update);
-
-
-router
-    .route("/:id")
+    .patch(warehouseController.update)
     .delete(warehouseController.remove);
 
 module.exports = router;
