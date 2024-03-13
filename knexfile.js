@@ -6,8 +6,8 @@ module.exports = {
   seeds: {
     directory: './seeds/'
   },
-  development: {
-    client: "mysql",
+
+    client: "mysql2",
     connection: {
       host: process.env.DB_HOST,
       database: process.env.DB_NAME,
@@ -15,7 +15,6 @@ module.exports = {
       password: process.env.DB_PASSWORD,
       charset: "utf8",
     },
-  },
-  // Define other environments like production here
-  // production: { ... }
-};
+  }
+
+;
