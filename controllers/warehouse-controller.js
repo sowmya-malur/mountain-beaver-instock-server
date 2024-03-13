@@ -11,10 +11,10 @@ const warehouses = async (_req, res) => {
 
 const index = async (_req, res) => {
     try {
-      const data = await knex('user');
+      const data = await knex('warehouses');
       res.status(200).json(data);
     } catch(err) {
-      res.status(400).send(`Error retrieving Users: ${err}`)
+      res.status(400).send(`Error retrieving warehouses: ${err}`)
     }
   }
   
