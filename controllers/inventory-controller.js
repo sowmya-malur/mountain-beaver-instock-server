@@ -40,7 +40,9 @@ const inventories = async (_req, res) => {
     };
     const add = async (req, res) => {
       // Check for required fields in the request body
-      if (!req.body.item_name || !req.body.description || !req.body.category || !req.body.status || !req.body.category) {
+      if (!req.body.item_name || !req.body.description 
+        || !req.body.category || !req.body.status 
+        || !req.body.category || !req.body.quantity) {
         return res.status(400).json({
           message: "Please provide name and email for the inventory.",
         });
