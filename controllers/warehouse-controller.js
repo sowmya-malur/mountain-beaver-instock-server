@@ -11,10 +11,10 @@ const warehouses = async (_req, res) => {
 
 const index = async (_req, res) => {
     try {
-      const data = await knex('user');
+      const data = await knex('warehouses');
       res.status(200).json(data);
     } catch(err) {
-      res.status(400).send(`Error retrieving Users: ${err}`)
+      res.status(400).send(`Error retrieving warehouses: ${err}`)
     }
   }
   
@@ -40,7 +40,10 @@ const findOne = async (req, res) => {
   };
   const add = async (req, res) => {
     // Check for required fields in the request body
-    if (!req.body.warehouse_name || !req.body.contact_email) {
+    if (!req.body.warehouse_name || !req.body.address
+        ||!req.body.city ||!req.body.country 
+        || !req.body.contact_name || !req.body.contact_position
+        || !req.body.contact_phone || !req.body.contact_email) {
       return res.status(400).json({
         message: "Please provide name and email for the warehouse.",
       });
