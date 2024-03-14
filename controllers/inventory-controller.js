@@ -22,7 +22,7 @@ const index = async (_req, res) => {
  * Finds a single inventory item by ID.
  * @param {*} req - The request object containing the id of the inventory.
  * @param {*} res - The response object.
- * @returns A JSON response containing the inventory item data and corresponding warehouse name.
+ * @returns A JSON response containing the inventory item data id, desc, item name, category, quantity, status and corresponding warehouse name.
  */
 const findOne = async (req, res) => {
   try {
@@ -53,11 +53,15 @@ const findOne = async (req, res) => {
       });
     }
 
-    // Destructure inventoryData and add warehouse name
-    const { warehouse_id, ...restInventoryData } = inventoryData;
+    // Constuct response
     const response = {
+      id: inventoryData.id,
       warehouse_name: warehousesFound[0].warehouse_name,
-      ...restInventoryData,
+      item_name: inventoryData.item_name,
+      description: inventoryData.description,
+      category: inventoryData.category,
+      status: inventoryData.status,
+      quantity: inventoryData.quantity,
     };
 
     // Return the response with 200 status
