@@ -10,7 +10,8 @@ const cors = require('cors');
 const CLIENT_URL = process.env.CLIENT_URL;
 app.use(express.json());
 
-app.use(cors({ origin: CLIENT_URL }));
+// app.use(cors({ origin: CLIENT_URL }));
+app.use(cors());
 
 app.use("/warehouses", warehouseRoute);
 app.use("/inventory", inventoryRoute);
