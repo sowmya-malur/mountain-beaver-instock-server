@@ -145,7 +145,7 @@ const getInventories = async (req, res) => {
       warehouse_id: warehousesFound[0].id,
     });
     //retrive the necessary info only
-    const response = inventoryList.map((item) => {
+    const list = inventoryList.map((item) => {
       return {
         id: item.id,
         item_name: item.item_name,
@@ -154,6 +154,7 @@ const getInventories = async (req, res) => {
         quantity: item.quantity,
       };
     });
+    const response = sortList(list, req.query.sort_by, req.query.order_by);
     res.status(200).json(response);
   } catch (error) {
     res.status(500).json({

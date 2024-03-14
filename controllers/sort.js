@@ -3,11 +3,19 @@ const sortList = (array, sort_by, order_by) => {
     return array.sort((a, b) => {
       const valueA = a[sort_by];
       const valueB = b[sort_by];
-      console.log(valueA, valueB);
-      if (order_by === "desc") {
-        return valueB.localeCompare(valueA);
+
+      if (typeof valueA === "number") {
+        if (order_by === "desc") {
+          return valueB - valueA;
+        } else {
+          return valueA - valueB;
+        }
       } else {
-        return valueA.localeCompare(valueB);
+        if (order_by === "desc") {
+          return valueB.localeCompare(valueA);
+        } else {
+          return valueA.localeCompare(valueB);
+        }
       }
     });
   } else {
