@@ -10,6 +10,12 @@ const sortList = (array, sort_by, order_by) => {
         } else {
           return valueA - valueB;
         }
+      } else if (sort_by === "updated_at" || sort_by === "created_at") {
+        if (order_by === "desc") {
+          return valueB.getTime() - valueA.getTime();
+        } else {
+          return valueA.getTime() - valueB.getTime();
+        }
       } else {
         if (order_by === "desc") {
           return valueB.localeCompare(valueA);
