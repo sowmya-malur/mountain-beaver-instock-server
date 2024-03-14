@@ -9,9 +9,15 @@ router
 
 router
   .route("/:id")
-  .get(warehouseController.findOne)
-  .put(warehouseController.update)
-  .delete(warehouseController.remove);
+  .get(warehouseController.findOne);
+
+router 
+    .route("/update/:id")
+    .put(warehouseController.update);
+    
+router
+    .route("/remove/:id")
+    .delete(warehouseController.remove);
 
 router.route("/:id/inventories").get(warehouseController.getInventories);
 
