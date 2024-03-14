@@ -1,9 +1,11 @@
 const knex = require("knex")(require("../knexfile"));
+const { sortList } = require("./sort.js");
 
-const warehouses = async (_req, res) => {
+const warehouses = async (req, res) => {
   try {
     const data = await knex("warehouses");
-    res.status(200).json(data);
+    const response = sortList(data, req.query.sort_by, req.query.order_by);
+    res.status(200).json(response);
   } catch (err) {
     res.status(400).send(`Error retrieving warehouses: ${err}`);
   }
