@@ -1,9 +1,11 @@
 const knex = require("knex")(require("../knexfile"));
+const { sortList } = require("./sort.js");
 
-const warehouses = async (_req, res) => {
+const warehouses = async (req, res) => {
   try {
     const data = await knex("warehouses");
-    res.status(200).json(data);
+    const response = sortList(data, req.query.sort_by, req.query.order_by);
+    res.status(200).json(response);
   } catch (err) {
     res.status(400).send(`Error retrieving warehouses: ${err}`);
   }
@@ -220,7 +222,7 @@ const getInventories = async (req, res) => {
       warehouse_id: warehousesFound[0].id,
     });
     //retrive the necessary info only
-    const response = inventoryList.map((item) => {
+    const list = inventoryList.map((item) => {
       return {
         id: item.id,
         item_name: item.item_name,
@@ -229,6 +231,7 @@ const getInventories = async (req, res) => {
         quantity: item.quantity,
       };
     });
+    const response = sortList(list, req.query.sort_by, req.query.order_by);
     res.status(200).json(response);
   } catch (error) {
     res.status(500).json({

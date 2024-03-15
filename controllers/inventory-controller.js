@@ -1,9 +1,18 @@
 const knex = require("knex")(require("../knexfile"));
 
-const inventories = async (_req, res) => {
+const { response } = require("express");
+const { sortList } = require("./sort.js");
+
+const inventories = async (req, res) => {
   try {
     const data = await knex("inventories");
-    res.status(200).json(data);
+    const warehouse = await knex("warehouses").where({
+      id: data[0].warehouse_id,
+    });
+    const name = warehouse[0].warehouse_name;
+    const newData = data.map((item) => ({ warehouse_name: name, ...item }));
+    const response = sortList(newData, req.query.sort_by, req.query.order_by);
+    res.status(200).json(response);
   } catch (err) {
     res.status(400).send(`Error retrieving inventories: ${err}`);
   }
@@ -85,7 +94,7 @@ const add = async (req, res) => {
     !req.body.quantity
   ) {
     return res.status(400).json({
-      message: "Please provide name and email for the inventory.",
+      message: "Please provide item name, description, category, status, and quantity for the inventory.",
     });
   }
 
@@ -150,7 +159,6 @@ const remove = async (req, res) => {
         .status(404)
         .json({ message: `inventory with ID ${req.params.id} not found` });
     }
-
     // No Content response
     res.sendStatus(204);
   } catch (error) {
