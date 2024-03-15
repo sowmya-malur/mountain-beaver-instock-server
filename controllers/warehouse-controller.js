@@ -38,6 +38,14 @@ const findOne = async (req, res) => {
     });
   }
 };
+
+/**
+ *
+ * @param {*} req The req object containing all the fields of the warehouse data
+ * @param {*} res The res object
+ * @returns JSON response containing all the fields of warehouse data and newly generated id
+ *          except the created and updated timestamp
+ */
 const add = async (req, res) => {
   // Check for required fields in the request body
   if (
@@ -51,7 +59,21 @@ const add = async (req, res) => {
     !req.body.contact_email
   ) {
     return res.status(400).json({
-      message: "Please provide name and email for the warehouse.",
+      message: "Please provide all required fields for the warehouse.",
+    });
+  }
+
+  // Check phone format
+  if (!/^\+\d{1}\s\(\d{3}\)\s\d{3}-\d{4}$/.test(req.body.contact_phone)) {
+    return res.status(400).json({
+      message: "Invalid phone format. Ex: +1 (xxx) xxx-xxxx",
+    });
+  }
+
+  // Check email format
+  if (!/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(req.body.contact_email)) {
+    return res.status(400).json({
+      message: "Invalid email format.Ex: example@example.com",
     });
   }
 
@@ -63,7 +85,6 @@ const add = async (req, res) => {
     const result = await knex("warehouses").insert(insertData);
 
     // Retrieve the ID of the newly inserted warehouse record
-    // Note: The structure of 'result' may vary based on the database used. Adjust as necessary.
     const newWarehouseId = result[0];
 
     // Fetch the newly created warehouse record from the database
@@ -71,8 +92,15 @@ const add = async (req, res) => {
       id: newWarehouseId,
     });
 
+    // Remove created_at and updated_at fields from the response
+    const responseWithoutDates = Object.fromEntries(
+      Object.entries(createdWarehouse).filter(
+        ([key, value]) => key !== "created_at" && key !== "updated_at"
+      )
+    );
+
     // Respond with the newly created warehouse record
-    res.status(201).json(createdWarehouse);
+    res.status(201).json(responseWithoutDates);
   } catch (error) {
     // Handle any errors that occur during the database operations
     res.status(500).json({
