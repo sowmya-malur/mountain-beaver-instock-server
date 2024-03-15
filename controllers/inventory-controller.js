@@ -1,4 +1,5 @@
 const knex = require("knex")(require("../knexfile"));
+
 const { response } = require("express");
 const { sortList } = require("./sort.js");
 
@@ -26,30 +27,62 @@ const index = async (_req, res) => {
   }
 };
 
+/**
+ * Finds a single inventory item by ID.
+ * @param {*} req - The request object containing the id of the inventory.
+ * @param {*} res - The response object.
+ * @returns A JSON response containing the inventory item data id, desc, item name, category, quantity, status and corresponding warehouse name.
+ */
 const findOne = async (req, res) => {
   try {
+    // Find inventory item by id
     const inventoriesFound = await knex("inventories").where({
       id: req.params.id,
     });
 
+    // If no inventory item found, return 404
     if (inventoriesFound.length === 0) {
       return res.status(404).json({
         message: `inventory with ID ${req.params.id} not found`,
       });
     }
+
+    // Extract the first inventory item found
     const inventoryData = inventoriesFound[0];
-    const warehouse = await knex("warehouses").where({
+
+    // Find warehouse by id
+    const warehousesFound = await knex("warehouses").where({
       id: inventoryData.warehouse_id,
     });
-    const warehouse_name = warehouse[0].warehouse_name;
-    const response = { warehouse_name, ...inventoryData };
-    res.json(response);
+
+    //if warehouse doesn't exist, response 404
+    if (warehousesFound.length === 0) {
+      return res.status(404).json({
+        message: `warehouse with ID ${req.params.id} not found`,
+      });
+    }
+
+    // Constuct response
+    const response = {
+      id: inventoryData.id,
+      warehouse_name: warehousesFound[0].warehouse_name,
+      item_name: inventoryData.item_name,
+      description: inventoryData.description,
+      category: inventoryData.category,
+      status: inventoryData.status,
+      quantity: inventoryData.quantity,
+    };
+
+    // Return the response with 200 status
+    res.status(200).json(response);
   } catch (error) {
+    // Handle internal server error
     res.status(500).json({
       message: `Unable to retrieve inventory data for inventory with ID ${req.params.id}`,
     });
   }
 };
+
 const add = async (req, res) => {
   // Check for required fields in the request body
   if (
@@ -57,11 +90,11 @@ const add = async (req, res) => {
     !req.body.description ||
     !req.body.category ||
     !req.body.status ||
+    !req.body.category ||
     !req.body.quantity
   ) {
     return res.status(400).json({
-      message:
-        "Please provide item name, description, category, status, and quantity for the inventory.",
+      message: "Please provide item name, description, category, status, and quantity for the inventory.",
     });
   }
 
@@ -126,7 +159,6 @@ const remove = async (req, res) => {
         .status(404)
         .json({ message: `inventory with ID ${req.params.id} not found` });
     }
-
     // No Content response
     res.sendStatus(204);
   } catch (error) {
