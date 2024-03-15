@@ -81,24 +81,73 @@ const add = async (req, res) => {
   }
 };
 
+/**
+ * Update the warehouse data for a given id.
+ * @param {*} req The req object containing all the fields of the warehouse data
+ * @param {*} res The res object
+ * @returns JSON response containing all the fields of warehouse data and the id
+ *          except for the created and updated timestamp
+ */
 const update = async (req, res) => {
   try {
+    // Check for the required fields in the request body
+    if (
+      !req.body.warehouse_name ||
+      !req.body.address ||
+      !req.body.city ||
+      !req.body.country ||
+      !req.body.contact_name ||
+      !req.body.contact_position ||
+      !req.body.contact_phone ||
+      !req.body.contact_email
+    ) {
+      return res.status(400).json({
+        message: "Please provide all required fields for the warehouse.",
+      });
+    }
+
+    // Check phone format
+    if (!/^\+\d{1}\s\(\d{3}\)\s\d{3}-\d{4}$/.test(req.body.contact_phone)) {
+      return res.status(400).json({
+        message: "Invalid phone format. Ex: +1 (xxx) xxx-xxxx",
+      });
+    }
+
+    // Check email format
+    if (!/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(req.body.contact_email)) {
+      return res.status(400).json({
+        message: "Invalid email format.Ex: example@example.com",
+      });
+    }
+
     const rowsUpdated = await knex("warehouses")
       .where({ id: req.params.id })
       .update(req.body);
 
+    // Check if the row was updated
     if (rowsUpdated === 0) {
       return res.status(404).json({
         message: `warehouse with ID ${req.params.id} not found`,
       });
     }
 
-    const updatedWarehouse = await knex("warehouses").where({
+    // Fetch updated warehouse record from the database
+    const [updatedWarehouse] = await knex("warehouses").where({
       id: req.params.id,
     });
 
-    res.json(updatedWarehouse[0]);
+    // Remove created_at and updated_at fields from the response
+    const responseWithoutDates = Object.fromEntries(
+      Object.entries(updatedWarehouse).filter(
+        ([key, value]) => key !== "created_at" && key !== "updated_at"
+      )
+    );
+
+    // Respond with updated warehouse record
+    res.status(200).json(responseWithoutDates);
+    
   } catch (error) {
+    // Handle any errors that occur during the database operations
     res.status(500).json({
       message: `Unable to update warehouse with ID ${req.params.id}: ${error}`,
     });
