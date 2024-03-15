@@ -1,14 +1,21 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
-require("dotenv").config(); 
+const warehouseRoute = require("./routes/warehouses");
+const inventoryRoute = require("./routes/inventory");
+const knexConfig = require('./knexfile.js');
+const knex = require('knex')(knexConfig);
+const PORT = process.env.PORT || 8080; // Fallback to 8080 if PORT is not defined in .env
+const cors = require('cors');
+const CLIENT_URL = process.env.CLIENT_URL;
+app.use(express.json());
 
-const { PORT, CLIENT_URL } = process.env;
+app.use(cors({ origin: CLIENT_URL }));
 
-app.get("/", (req, res) => {
-    res.send("<h1>Hello, World </h1>");
-  });
+app.use("/warehouses", warehouseRoute);
+app.use("/inventory", inventoryRoute);
 
-  app.listen(PORT, () => {
-    console.log(`app running at ${CLIENT_URL}:${PORT}`);
-  });
-  
+
+app.listen(PORT, () => {
+  console.log(`app running at "http://localhost:${PORT}"`);
+});
