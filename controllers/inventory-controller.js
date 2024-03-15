@@ -1,10 +1,16 @@
 const knex = require("knex")(require("../knexfile"));
+const { response } = require("express");
 const { sortList } = require("./sort.js");
 
 const inventories = async (req, res) => {
   try {
     const data = await knex("inventories");
-    const response = sortList(data, req.query.sort_by, req.query.order_by);
+    const warehouse = await knex("warehouses").where({
+      id: data[0].warehouse_id,
+    });
+    const name = warehouse[0].warehouse_name;
+    const newData = data.map((item) => ({ warehouse_name: name, ...item }));
+    const response = sortList(newData, req.query.sort_by, req.query.order_by);
     res.status(200).json(response);
   } catch (err) {
     res.status(400).send(`Error retrieving inventories: ${err}`);
@@ -31,9 +37,13 @@ const findOne = async (req, res) => {
         message: `inventory with ID ${req.params.id} not found`,
       });
     }
-
     const inventoryData = inventoriesFound[0];
-    res.json(inventoryData);
+    const warehouse = await knex("warehouses").where({
+      id: inventoryData.warehouse_id,
+    });
+    const warehouse_name = warehouse[0].warehouse_name;
+    const response = { warehouse_name, ...inventoryData };
+    res.json(response);
   } catch (error) {
     res.status(500).json({
       message: `Unable to retrieve inventory data for inventory with ID ${req.params.id}`,
