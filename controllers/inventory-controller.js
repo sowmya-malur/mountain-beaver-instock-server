@@ -57,11 +57,11 @@ const add = async (req, res) => {
     !req.body.description ||
     !req.body.category ||
     !req.body.status ||
-    !req.body.category ||
     !req.body.quantity
   ) {
     return res.status(400).json({
-      message: "Please provide name and email for the inventory.",
+      message:
+        "Please provide item name, description, category, status, and quantity for the inventory.",
     });
   }
 
