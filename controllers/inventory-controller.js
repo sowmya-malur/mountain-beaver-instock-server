@@ -94,7 +94,8 @@ const add = async (req, res) => {
     !req.body.quantity
   ) {
     return res.status(400).json({
-      message: "Please provide item name, description, category, status, and quantity for the inventory.",
+      message:
+        "Please provide item name, description, category, status, and quantity for the inventory.",
     });
   }
 
@@ -126,6 +127,53 @@ const add = async (req, res) => {
 
 const update = async (req, res) => {
   try {
+    // Check for required fields in the request body
+    if (
+      !req.body.warehouse_id ||
+      !req.body.item_name ||
+      !req.body.description ||
+      !req.body.category ||
+      !req.body.status ||
+      !req.body.quantity
+    ) {
+      return res.status(400).json({
+        message:
+          "Please provide warehouse id, item name, description, category, status, and quantity for the inventory.",
+      });
+    }
+
+    // Check if the quantity is not a number.
+    if (isNaN(req.body.quantity)) {
+      return res.status(400).json({
+        message: "Quantity must be a number.",
+      });
+    }
+
+    // Check if the quantity is not a whole number.
+    if (!Number.isInteger(Number(req.body.quantity))) {
+      return res.status(400).json({
+        message: "Quantity must be a whole number.",
+      });
+    }
+
+    // Check if quantity is zero or less.
+    if (req.body.status === "In stock" && req.body.quantity <= 0) {
+      return res.status(400).json({
+        message: "Quantity cannot be zero(0).",
+      });
+    }
+
+    // Check if the warehouse exists
+    const warehousesFound = await knex("warehouses").where({
+      id: req.body.warehouse_id,
+    });
+
+    if (warehousesFound.length === 0) {
+      return res.status(404).json({
+        message: `warehouse with ID ${req.body.warehouse_id} not found`,
+      });
+    }
+
     const rowsUpdated = await knex("inventories")
       .where({ id: req.params.id })
       .update(req.body);
@@ -136,11 +184,19 @@ const update = async (req, res) => {
       });
     }
 
-    const updatedInventory = await knex("inventories").where({
+    const [updatedInventory] = await knex("inventories").where({
       id: req.params.id,
     });
 
-    res.json(updatedInventory[0]);
+    // Remove created_at and updated_at fields from the response
+    const responseWithoutDates = Object.fromEntries(
+      Object.entries(updatedInventory).filter(
+        ([key, value]) => key !== "created_at" && key !== "updated_at"
+      )
+    );
+
+    // Respond with the newly created warehouse record
+    res.status(201).json(responseWithoutDates);
   } catch (error) {
     res.status(500).json({
       message: `Unable to update inventory with ID ${req.params.id}: ${error}`,
