@@ -85,29 +85,61 @@ const findOne = async (req, res) => {
 };
 
 const add = async (req, res) => {
-  // Check for required fields in the request body
-  if (
-    !req.body.item_name ||
-    !req.body.description ||
-    !req.body.category ||
-    !req.body.status ||
-    !req.body.category ||
-    !req.body.quantity
-  ) {
-    return res.status(400).json({
-      message: "Please provide item name, description, category, status, and quantity for the inventory.",
-    });
-  }
-
-  // Prepare the data for insertion by excluding the 'id' field, if present
-  const { id, ...insertData } = req.body;
-
   try {
+    // Check for required fields in the request body
+    if (
+      !req.body.warehouse_id ||
+      !req.body.item_name ||
+      !req.body.description ||
+      !req.body.category ||
+      !req.body.status ||
+      !req.body.quantity
+    ) {
+      return res.status(400).json({
+        message:
+          "Please provide warehouse id, item name, description, category, status, and quantity for the inventory.",
+      });
+    }
+
+    // Check if the quantity is not a number.
+    if (isNaN(req.body.quantity)) {
+      return res.status(400).json({
+        message: "Quantity must be a number.",
+      });
+    }
+
+    // Check if the quantity is not a whole number.
+    if (!Number.isInteger(Number(req.body.quantity))) {
+      return res.status(400).json({
+        message: "Quantity must be a whole number.",
+      });
+    }
+
+    // Check if quantity is zero or less.
+    if (req.body.status === "In stock" && req.body.quantity <= 0) {
+      return res.status(400).json({
+        message: "Quantity cannot be zero(0).",
+      });
+    }
+
+    // Check if the warehouse exists
+    const warehousesFound = await knex("warehouses").where({
+      id: req.body.warehouse_id,
+    });
+
+    if (warehousesFound.length === 0) {
+      return res.status(404).json({
+        message: `warehouse with ID ${req.body.warehouse_id} not found`,
+      });
+    }
+
+    // Prepare the data for insertion by excluding the 'id' field, if present
+    const { id, ...insertData } = req.body;
+
     // Insert the inventory data into the database
     const result = await knex("inventories").insert(insertData);
 
     // Retrieve the ID of the newly inserted inventory record
-    // Note: The structure of 'result' may vary based on the database used. Adjust as necessary.
     const newInventoryId = result[0];
 
     // Fetch the newly created inventory record from the database
@@ -115,8 +147,16 @@ const add = async (req, res) => {
       id: newInventoryId,
     });
 
+     // Remove created_at and updated_at fields from the response
+     const responseWithoutDates = Object.fromEntries(
+      Object.entries(createdInventory).filter(
+        ([key, value]) => key !== "created_at" && key !== "updated_at"
+      )
+    );
+
     // Respond with the newly created inventory record
-    res.status(201).json(createdInventory);
+    res.status(201).json(responseWithoutDates);
+
   } catch (error) {
     // Handle any errors that occur during the database operations
     res.status(500).json({
