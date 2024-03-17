@@ -14,7 +14,6 @@ const inventories = async (req, res) => {
       const name = warehouse.warehouse_name;
       return { warehouse_name: name, ...item };
     });
-    console.log(newData);
     const response = sortList(newData, req.query.sort_by, req.query.order_by);
     res.status(200).json(response);
   } catch (err) {
