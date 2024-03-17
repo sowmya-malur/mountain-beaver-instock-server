@@ -6,11 +6,15 @@ const { sortList } = require("./sort.js");
 const inventories = async (req, res) => {
   try {
     const data = await knex("inventories");
-    const warehouse = await knex("warehouses").where({
-      id: data[0].warehouse_id,
+    const warehouses = await knex("warehouses");
+    const newData = data.map((item) => {
+      const warehouse = warehouses.find(
+        (house) => house.id === item.warehouse_id
+      );
+      const name = warehouse.warehouse_name;
+      return { warehouse_name: name, ...item };
     });
-    const name = warehouse[0].warehouse_name;
-    const newData = data.map((item) => ({ warehouse_name: name, ...item }));
+    console.log(newData);
     const response = sortList(newData, req.query.sort_by, req.query.order_by);
     res.status(200).json(response);
   } catch (err) {
@@ -95,7 +99,8 @@ const add = async (req, res) => {
     !req.body.quantity
   ) {
     return res.status(400).json({
-      message: "Please provide item name, description, category, status, and quantity for the inventory.",
+      message:
+        "Please provide item name, description, category, status, and quantity for the inventory.",
     });
   }
 
