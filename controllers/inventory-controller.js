@@ -68,7 +68,7 @@ const findOne = async (req, res) => {
     // Constuct response
     const response = {
       id: inventoryData.id,
-      warehouse_id: warehousesFound[0].warehouse_name,
+      warehouse_id: warehousesFound[0].warehouse_id,
       warehouse_name: warehousesFound[0].warehouse_name,
       item_name: inventoryData.item_name,
       description: inventoryData.description,
