@@ -64,11 +64,11 @@ const findOne = async (req, res) => {
         message: `warehouse with ID ${req.params.id} not found`,
       });
     }
-
+    console.log(warehousesFound[0]);
     // Constuct response
     const response = {
       id: inventoryData.id,
-      warehouse_id: warehousesFound[0].warehouse_id,
+      warehouse_id: warehousesFound[0].id,
       warehouse_name: warehousesFound[0].warehouse_name,
       item_name: inventoryData.item_name,
       description: inventoryData.description,
@@ -77,6 +77,7 @@ const findOne = async (req, res) => {
       quantity: inventoryData.quantity,
     };
 
+    console.log(response);
     // Return the response with 200 status
     res.status(200).json(response);
   } catch (error) {
